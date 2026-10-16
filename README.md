@@ -31,12 +31,19 @@ Se der erro de versão, troca a versão do Expo no Snack (fica embaixo, do lado 
 
 ## API
 
-Os dados vêm da [Internet Quality API](https://internet-quality-api.onrender.com/docs). Usamos duas rotas:
+Os dados vão vir da [Internet Quality API](https://internet-quality-api.onrender.com/docs). A ideia é usar duas rotas:
 
 - `GET /api/v1/models` para pegar a lista de modelos (A, B, C e D)
 - `POST /api/v1/activity/check` para pegar a previsão de uma atividade em um dia e horário
 
-A API fica hospedada no Render, então a primeira consulta pode demorar até 1 minuto pra responder. Depois fica rápido.
+A API fica hospedada no Render, então a primeira consulta pode demorar até 1 minuto pra responder.
+
+## O que falta
+
+- [ ] Ligar as telas com a API (por enquanto os dados são fixos, só de exemplo)
+- [ ] Fazer o botão "Ver previsão" e o "Consultar outro horário" funcionarem
+- [ ] Mostrar as mensagens de carregando e de erro quando a API demorar ou falhar
+- [ ] Testar no celular com o leitor de tela
 
 ## Acessibilidade
 
