@@ -8,7 +8,6 @@ const LONGITUDE = -46.63;
 export const MODELO_PADRAO = 'model-a';
 
 // atividades do app e o tipo correspondente na api
-// a api não tem "jogos", então usamos a regra da videochamada (as duas precisam de resposta rápida)
 export const ATIVIDADES = [
   { chave: 'video', nome: 'Videoconferência', icone: 'videocam', tipoApi: 'VIDEO_CALL' },
   { chave: 'streaming', nome: 'Streaming', icone: 'tv', tipoApi: 'STREAMING' },
