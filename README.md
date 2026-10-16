@@ -9,7 +9,7 @@ App de previsão da qualidade da internet feito em React Native + Expo para a di
 
 ## API
 
-Os dados vêm da [Internet Quality API](https://internet-quality-api.onrender.com/docs) (`POST /api/v1/activity/check` e `GET /api/v1/models`).
+Usamos os dados da API [Internet Quality API](https://internet-quality-api.onrender.com/docs) (`POST /api/v1/activity/check` e `GET /api/v1/models`).
 
 A API fica no Render, então a primeira consulta pode demorar até 1 minuto.
 
