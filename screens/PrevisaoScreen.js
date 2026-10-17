@@ -1,11 +1,13 @@
+import { useState, useEffect } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import SeloQualidade from '../components/SeloQualidade';
 import ItemAtividade from '../components/ItemAtividade';
 import BotaoPrincipal from '../components/BotaoPrincipal';
+import MensagemEstado from '../components/MensagemEstado';
 import { CORES, QUALIDADES } from '../components/cores';
-import { ATIVIDADES } from '../services/api';
+import { ATIVIDADES, MODELO_PADRAO, verificarAtividade } from '../services/api';
 
 function formatarHora(data) {
   const hora = String(data.getHours()).padStart(2, '0');
@@ -13,13 +15,49 @@ function formatarHora(data) {
   return hora + ':' + minuto;
 }
 
-export default function PrevisaoScreen() {
-  const horario = formatarHora(new Date());
+export default function PrevisaoScreen({ navigation }) {
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(false);
+  const [horario, setHorario] = useState('');
+  const [qualidade, setQualidade] = useState(null);
+  const [atividades, setAtividades] = useState([]);
 
-  // valor fixo por enquanto, depois vai vir da api
-  const qualidade = 'GOOD';
+  async function carregarPrevisao() {
+    setCarregando(true);
+    setErro(false);
+    try {
+      const agora = new Date();
+      setHorario(formatarHora(agora));
+
+      // busca a previsão de todas as atividades ao mesmo tempo
+      const respostas = await Promise.all(
+        ATIVIDADES.map((item) => verificarAtividade(MODELO_PADRAO, agora, item.tipoApi))
+      );
+
+      const primeira = respostas.find((r) => r !== null);
+      setQualidade(primeira ? primeira.forecast.quality : null);
+      setAtividades(
+        ATIVIDADES.map((item, i) => ({
+          ...item,
+          adequada: respostas[i] ? respostas[i].suitable : null,
+          qualidade: respostas[i] ? respostas[i].forecast.quality : null,
+        }))
+      );
+    } catch (e) {
+      setErro(true);
+    }
+    setCarregando(false);
+  }
+
+  useEffect(() => {
+    carregarPrevisao();
+  }, []);
 
   function mostrarConteudo() {
+    if (carregando) return <MensagemEstado tipo="carregando" />;
+    if (erro) return <MensagemEstado tipo="erro" onTentarDeNovo={carregarPrevisao} />;
+    if (!qualidade) return <MensagemEstado tipo="vazio" />;
+
     return (
       <>
         <View style={styles.card}>
@@ -35,8 +73,14 @@ export default function PrevisaoScreen() {
           <Text style={styles.tituloCard} accessibilityRole="header">
             Atividades recomendadas
           </Text>
-          {ATIVIDADES.map((item) => (
-            <ItemAtividade key={item.chave} nome={item.nome} icone={item.icone} adequada={true} />
+          {atividades.map((item) => (
+            <ItemAtividade
+              key={item.chave}
+              nome={item.nome}
+              icone={item.icone}
+              adequada={item.adequada}
+              qualidade={item.qualidade}
+            />
           ))}
         </View>
       </>
@@ -62,7 +106,8 @@ export default function PrevisaoScreen() {
 
         <BotaoPrincipal
           titulo="Consultar outro horário"
-          onPress={() => {}}
+          dica="Abre a aba Por atividade"
+          onPress={() => navigation.navigate('PorAtividade')}
         />
       </ScrollView>
     </SafeAreaView>
