@@ -1,18 +1,13 @@
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BotaoPrincipal from './BotaoPrincipal';
+import CenaConsulta from './CenaConsulta';
 import { CORES } from './cores';
 
 // mostra os estados de carregando, erro e sem resultado
 export default function MensagemEstado({ tipo, onTentarDeNovo }) {
   if (tipo === 'carregando') {
-    return (
-      <View style={styles.caixa} accessibilityLiveRegion="polite">
-        <ActivityIndicator size="large" color={CORES.primaria} />
-        <Text style={styles.titulo}>Carregando...</Text>
-        <Text style={styles.texto}>A primeira consulta pode demorar até 1 minuto.</Text>
-      </View>
-    );
+    return <CenaConsulta />;
   }
 
   if (tipo === 'erro') {

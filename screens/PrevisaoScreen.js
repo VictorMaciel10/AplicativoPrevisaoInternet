@@ -6,6 +6,7 @@ import SeloQualidade from '../components/SeloQualidade';
 import ItemAtividade from '../components/ItemAtividade';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import MensagemEstado from '../components/MensagemEstado';
+import Surgir from '../components/Surgir';
 import { CORES, QUALIDADES } from '../components/cores';
 import { ATIVIDADES, MODELO_PADRAO, verificarAtividade } from '../services/api';
 
@@ -60,16 +61,16 @@ export default function PrevisaoScreen({ navigation }) {
 
     return (
       <>
-        <View style={styles.card}>
+        <Surgir style={styles.card}>
           <Text style={styles.tituloCard} accessibilityRole="header">
             Qualidade da conexão
           </Text>
           <Text style={styles.horario}>Agora, {horario}</Text>
           <SeloQualidade qualidade={qualidade} />
           <Text style={styles.explicacao}>{QUALIDADES[qualidade].explicacao}</Text>
-        </View>
+        </Surgir>
 
-        <View style={styles.card}>
+        <Surgir atraso={120} style={styles.card}>
           <Text style={styles.tituloCard} accessibilityRole="header">
             Atividades recomendadas
           </Text>
@@ -82,7 +83,7 @@ export default function PrevisaoScreen({ navigation }) {
               qualidade={item.qualidade}
             />
           ))}
-        </View>
+        </Surgir>
       </>
     );
   }

@@ -6,10 +6,16 @@ import Opcao from '../components/Opcao';
 import SeloQualidade from '../components/SeloQualidade';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import MensagemEstado from '../components/MensagemEstado';
+import Surgir from '../components/Surgir';
 import { CORES, QUALIDADES } from '../components/cores';
 import { ATIVIDADES, MODELO_PADRAO, buscarModelos, verificarAtividade } from '../services/api';
 
 const HORARIOS = ['08:00', '12:00', '18:00', '20:00', '22:00'];
+
+// tempo mínimo da animação de consulta, para ela não piscar quando a api responde rápido
+function esperar(ms) {
+  return new Promise((resolver) => setTimeout(resolver, ms));
+}
 
 // monta a data a partir do período e do horário escolhidos
 function montarData(periodo, horario) {
@@ -58,9 +64,13 @@ export default function PorAtividadeScreen() {
 
   async function verPrevisao() {
     setEstado('carregando');
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     const itemAtividade = ATIVIDADES.find((a) => a.chave === atividade);
     try {
-      const resposta = await verificarAtividade(modeloId, montarData(periodo, horario), itemAtividade.tipoApi);
+      const [resposta] = await Promise.all([
+        verificarAtividade(modeloId, montarData(periodo, horario), itemAtividade.tipoApi),
+        esperar(1500),
+      ]);
       if (!resposta) {
         setEstado('vazio');
         return;
@@ -92,18 +102,20 @@ export default function PorAtividadeScreen() {
     const quando = resultado.periodo === 'amanha' ? ' de amanhã' : '';
 
     return (
-      <View style={styles.cardResultado} accessibilityLiveRegion="polite">
+      <Surgir style={styles.cardResultado} accessibilityLiveRegion="polite">
         <Text style={styles.tituloSecao} accessibilityRole="header">
           Sua previsão
         </Text>
-        <SeloQualidade qualidade={resultado.qualidade} />
+        <Surgir atraso={150} style={styles.selo}>
+          <SeloQualidade qualidade={resultado.qualidade} />
+        </Surgir>
         <Text style={styles.frase}>
           Às {resultado.horario}{quando}, a conexão prevista é {info.texto}.
         </Text>
         <Text style={styles.texto}>
           {explicar(resultado.nome, resultado.adequada, resultado.qualidade)}
         </Text>
-      </View>
+      </Surgir>
     );
   }
 
@@ -214,6 +226,9 @@ const styles = StyleSheet.create({
     gap: 10,
     borderWidth: 1,
     borderColor: '#E1E3E8',
+  },
+  selo: {
+    alignSelf: 'flex-start',
   },
   frase: {
     fontSize: 18,
