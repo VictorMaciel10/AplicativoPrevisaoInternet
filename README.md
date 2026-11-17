@@ -64,3 +64,7 @@ screens/      -> as telas (Previsão e Por atividade)
 components/   -> partes que se repetem (botão, selo, mensagens...)
 services/     -> api.js, onde ficam as chamadas pra API
 ```
+
+# Autores
+Victor de Souza Maciel
+Samuel Bispo Gama
