@@ -67,4 +67,17 @@ services/     -> api.js, onde ficam as chamadas pra API
 
 # Autores
 Victor de Souza Maciel
+
 Samuel Bispo Gama
+
+Khevvyn Coelho Panchito
+
+Otavio Pinto de Campos
+
+Matheus Henrique Lima Santos
+
+Vitor Lourenço Beletati de Lima
+
+Tiago Ramos dos Santos
+
+Lincoln de Souza Araujo
