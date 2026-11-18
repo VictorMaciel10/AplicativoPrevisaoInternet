@@ -43,8 +43,13 @@ function montarData(periodo, horario) {
 
 // explica em linguagem simples o que a previsão significa para a atividade
 function explicar(nomeAtividade, adequada, qualidade) {
-  if (adequada) {
+  if (adequada && qualidade === 'GOOD') {
     return nomeAtividade + ' deve funcionar bem nesse horário, sem travar.';
+  }
+  // a conexão não está boa, mas a atividade gasta pouca internet e funciona mesmo assim
+  if (adequada) {
+    const nivel = qualidade === 'UNSTABLE' ? 'ruim' : 'média';
+    return 'Mesmo com a conexão ' + nivel + ', ' + nomeAtividade + ' deve funcionar, porque usa pouca internet.';
   }
   if (qualidade === 'UNSTABLE') {
     return nomeAtividade + ' provavelmente vai ter problemas nesse horário. Se puder, escolha outro horário.';
