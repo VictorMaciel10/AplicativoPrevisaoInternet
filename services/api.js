@@ -13,6 +13,7 @@ export const ATIVIDADES = [
   { chave: 'streaming', nome: 'Streaming', icone: 'tv', tipoApi: 'STREAMING' },
   { chave: 'jogos', nome: 'Jogos online', icone: 'game-controller', tipoApi: 'VIDEO_CALL' },
   { chave: 'navegacao', nome: 'Navegação', icone: 'globe', tipoApi: 'WEB_BROWSING' },
+  { chave: 'mensagens', nome: 'Mensagens', icone: 'chatbubbles', tipoApi: 'MESSAGING' },
   { chave: 'arquivos', nome: 'Envio de arquivos', icone: 'cloud-upload', tipoApi: 'FILE_UPLOAD' },
 ];
 
