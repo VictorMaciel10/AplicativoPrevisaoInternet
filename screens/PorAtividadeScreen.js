@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Opcao from '../components/Opcao';
@@ -7,10 +7,23 @@ import SeloQualidade from '../components/SeloQualidade';
 import BotaoPrincipal from '../components/BotaoPrincipal';
 import MensagemEstado from '../components/MensagemEstado';
 import Surgir from '../components/Surgir';
+import Conectando from '../components/Conectando';
 import { CORES, QUALIDADES } from '../components/cores';
 import { ATIVIDADES, MODELO_PADRAO, buscarModelos, verificarAtividade } from '../services/api';
 
-const HORARIOS = ['08:00', '12:00', '18:00', '20:00', '22:00'];
+const HORARIOS = ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+
+// confere se o horário digitado é válido (de 00:00 até 23:59)
+function horarioValido(texto) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(texto);
+}
+
+// coloca os dois pontos sozinho enquanto a pessoa digita (2030 -> 20:30)
+function formatarDigitado(texto) {
+  const numeros = texto.replace(/\D/g, '').slice(0, 4);
+  if (numeros.length <= 2) return numeros;
+  return numeros.slice(0, 2) + ':' + numeros.slice(2);
+}
 
 // tempo mínimo da animação de consulta, para ela não piscar quando a api responde rápido
 function esperar(ms) {
@@ -23,8 +36,8 @@ function montarData(periodo, horario) {
   if (periodo === 'amanha') {
     data.setDate(data.getDate() + 1);
   }
-  const hora = Number(horario.split(':')[0]);
-  data.setHours(hora, 0, 0, 0);
+  const [hora, minuto] = horario.split(':').map(Number);
+  data.setHours(hora, minuto, 0, 0);
   return data;
 }
 
@@ -43,6 +56,8 @@ export default function PorAtividadeScreen() {
   const [atividade, setAtividade] = useState(ATIVIDADES[0].chave);
   const [periodo, setPeriodo] = useState('hoje');
   const [horario, setHorario] = useState('20:00');
+  const [horarioDigitado, setHorarioDigitado] = useState('');
+  const [erroHorario, setErroHorario] = useState(false);
   const [modelos, setModelos] = useState([]);
   const [modeloId, setModeloId] = useState(MODELO_PADRAO);
   const [estado, setEstado] = useState('inicio'); // inicio, carregando, erro, vazio, ok
@@ -60,15 +75,22 @@ export default function PorAtividadeScreen() {
   function escolher(setValor, valor) {
     setValor(valor);
     setEstado('inicio');
+    setErroHorario(false);
   }
 
   async function verPrevisao() {
+    const horarioEscolhido = horario === 'outro' ? horarioDigitado : horario;
+    if (!horarioValido(horarioEscolhido)) {
+      setErroHorario(true);
+      return;
+    }
+    setErroHorario(false);
     setEstado('carregando');
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     const itemAtividade = ATIVIDADES.find((a) => a.chave === atividade);
     try {
       const [resposta] = await Promise.all([
-        verificarAtividade(modeloId, montarData(periodo, horario), itemAtividade.tipoApi),
+        verificarAtividade(modeloId, montarData(periodo, horarioEscolhido), itemAtividade.tipoApi),
         esperar(1500),
       ]);
       if (!resposta) {
@@ -77,7 +99,7 @@ export default function PorAtividadeScreen() {
       }
       setResultado({
         nome: itemAtividade.nome,
-        horario: horario,
+        horario: horarioEscolhido,
         periodo: periodo,
         qualidade: resposta.forecast.quality,
         adequada: resposta.suitable,
@@ -155,13 +177,44 @@ export default function PorAtividadeScreen() {
           {HORARIOS.map((h) => (
             <Opcao pequeno key={h} texto={h} selecionado={horario === h} onPress={() => escolher(setHorario, h)} />
           ))}
+          <Opcao pequeno texto="Outro" selecionado={horario === 'outro'} onPress={() => escolher(setHorario, 'outro')} />
         </View>
+        {horario === 'outro' && (
+          <View style={styles.campoHorario}>
+            <Text style={styles.rotulo}>Digite o horário</Text>
+            <TextInput
+              style={[styles.entrada, erroHorario && styles.entradaErro]}
+              value={horarioDigitado}
+              onChangeText={(texto) => {
+                setHorarioDigitado(formatarDigitado(texto));
+                setErroHorario(false);
+                setEstado('inicio');
+              }}
+              placeholder="Ex.: 19:30"
+              placeholderTextColor={CORES.textoSuave}
+              keyboardType="number-pad"
+              maxLength={5}
+              accessibilityLabel="Digite o horário, por exemplo 19 e 30"
+              autoFocus
+            />
+            {erroHorario && (
+              <Text style={styles.textoErro} accessibilityRole="alert">
+                Digite um horário válido, de 00:00 até 23:59.
+              </Text>
+            )}
+          </View>
+        )}
 
         <Text style={styles.tituloSecao} accessibilityRole="header">
           Modelo de previsão
         </Text>
         <View style={styles.linha}>
-          {modelos.length === 0 && <Text style={styles.texto}>Carregando modelos...</Text>}
+          {modelos.length === 0 && (
+            <View style={styles.carregandoModelos}>
+              <Conectando />
+              <Text style={styles.texto}>Carregando modelos...</Text>
+            </View>
+          )}
           {modelos.map((m) => (
             <Opcao pequeno key={m.id} texto={m.name} selecionado={modeloId === m.id} onPress={() => escolher(setModeloId, m.id)} />
           ))}
@@ -171,6 +224,8 @@ export default function PorAtividadeScreen() {
           titulo="Ver previsão"
           onPress={verPrevisao}
           desativado={estado === 'carregando'}
+          carregando={estado === 'carregando'}
+          tituloCarregando="Consultando..."
         />
 
         {mostrarResultado()}
@@ -213,6 +268,32 @@ const styles = StyleSheet.create({
   linha: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  campoHorario: {
+    gap: 6,
+  },
+  entrada: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    borderRadius: 12,
+    backgroundColor: CORES.card,
+    paddingHorizontal: 14,
+    fontSize: 18,
+    color: CORES.texto,
+  },
+  entradaErro: {
+    borderWidth: 2,
+    borderColor: '#B3261E',
+  },
+  textoErro: {
+    fontSize: 15,
+    color: '#B3261E',
+  },
+  carregandoModelos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   dica: {
     fontSize: 16,

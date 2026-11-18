@@ -1,7 +1,8 @@
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text, View, StyleSheet } from 'react-native';
+import Conectando from './Conectando';
 import { CORES } from './cores';
 
-export default function BotaoPrincipal({ titulo, onPress, dica, desativado }) {
+export default function BotaoPrincipal({ titulo, onPress, dica, desativado, carregando, tituloCarregando }) {
   return (
     <Pressable
       onPress={onPress}
@@ -16,7 +17,14 @@ export default function BotaoPrincipal({ titulo, onPress, dica, desativado }) {
         desativado && styles.desativado,
       ]}
     >
-      <Text style={styles.texto}>{titulo}</Text>
+      {carregando ? (
+        <View style={styles.linha}>
+          <Conectando cor="#FFFFFF" />
+          <Text style={styles.texto}>{tituloCarregando}</Text>
+        </View>
+      ) : (
+        <Text style={styles.texto}>{titulo}</Text>
+      )}
     </Pressable>
   );
 }
@@ -36,6 +44,11 @@ const styles = StyleSheet.create({
   },
   desativado: {
     backgroundColor: '#5F6368',
+  },
+  linha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   texto: {
     color: '#FFFFFF',
