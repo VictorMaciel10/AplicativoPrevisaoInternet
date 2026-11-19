@@ -38,6 +38,12 @@ Os dados vêm da [Internet Quality API](https://internet-quality-api.onrender.co
 
 A API fica hospedada no Render, então a primeira consulta pode demorar até 1 minuto pra responder. Depois fica rápido.
 
+### A API só tem previsões de um dia
+
+A API é de teste e só tem previsões do dia **20/08/2026**, uma para cada hora. Se a gente consultar outra data (hoje ou amanhã, por exemplo), ela não acha previsão e devolve sempre a última do dia 20, então o resultado nunca muda.
+
+Por isso o app pega o horário que a pessoa escolheu e consulta ele no dia 20/08/2026 (função `noDiaDaApi` no `services/api.js`). Assim o resultado muda conforme a hora. No Modelo A, por exemplo, a conexão fica boa de madrugada (23h às 6h), média de manhã e à noite, e ruim no fim da tarde.
+
 ## Acessibilidade
 
 - O resultado nunca aparece só pela cor, sempre tem o texto (Boa, Média ou Ruim) e um ícone junto.
