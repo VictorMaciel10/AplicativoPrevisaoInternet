@@ -4,6 +4,14 @@ const BASE_URL = 'https://internet-quality-api.onrender.com/api/v1';
 const LATITUDE = -23.55;
 const LONGITUDE = -46.63;
 
+// a api só tem previsões do dia 20/08/2026, então usamos esse dia
+// e mantemos só o horário que a pessoa escolheu
+function noDiaDaApi(dataHora) {
+  const data = new Date(dataHora);
+  data.setFullYear(2026, 7, 20);
+  return data;
+}
+
 // modelo usado na tela inicial
 export const MODELO_PADRAO = 'model-a';
 
@@ -45,7 +53,7 @@ export async function verificarAtividade(modeloId, dataHora, tipoApi) {
       modelId: modeloId,
       latitude: LATITUDE,
       longitude: LONGITUDE,
-      dateTime: dataHora.toISOString(),
+      dateTime: noDiaDaApi(dataHora).toISOString(),
       activity: tipoApi,
     }),
   });
